@@ -1,0 +1,62 @@
+datasource postgres {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  accountingPeriod   AccountingPeriod? @relation(fields: [accountingPeriodId], references: [id])
+  accountingPeriodId String?
+  createdAt          DateTime          @default(now())
+  firstName          String?
+  id                 String            @id @default(cuid())
+  lastName           String?
+  password           String
+  roles              String[]
+  updatedAt          DateTime          @updatedAt
+  username           String            @unique
+}
+
+model AccountPeriodType {
+  accountingPeriods AccountingPeriod[]
+  createdAt         DateTime           @default(now())
+  durationInMonths  Float              @unique
+  id                String             @id @default(cuid())
+  name              String             @unique
+  updatedAt         DateTime           @updatedAt
+}
+
+model AccountingPeriod {
+  createdAt    DateTime           @default(now())
+  end          DateTime
+  id           String             @id @default(cuid())
+  start        DateTime
+  transactions Transaction[]
+  typeId       AccountPeriodType? @relation(fields: [typeIdId], references: [id])
+  typeIdId     String?
+  updatedAt    DateTime           @updatedAt
+  users        User[]
+}
+
+model Category {
+  createdAt    DateTime      @default(now())
+  id           String        @id @default(cuid())
+  label        String        @unique
+  transactions Transaction[]
+  updatedAt    DateTime      @updatedAt
+}
+
+model Transaction {
+  accountingPeriod   AccountingPeriod? @relation(fields: [accountingPeriodId], references: [id])
+  accountingPeriodId String?
+  amount             Float
+  category           Category?         @relation(fields: [categoryId], references: [id])
+  categoryId         String?
+  createdAt          DateTime          @default(now())
+  date               DateTime
+  id                 String            @id @default(cuid())
+  updatedAt          DateTime          @updatedAt
+}
